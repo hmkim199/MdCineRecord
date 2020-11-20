@@ -1,0 +1,183 @@
+<!Doctype html>
+<html lang="ko">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <title>의약품 복용기록 관리</title>
+    <!-- JQuery를 import 합니다 -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <style type="text/css">
+        div.question-box {
+            margin: 10px 0 20px 0;
+        }
+
+        table {
+            border: 1px solid;
+            border-collapse: collapse;
+        }
+
+        td,
+        th {
+            padding: 10px;
+            border: 1px solid;
+        }
+
+        .urgent {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+
+    <script>
+        // 받아온 정보를 화면(테이블 안 열)에 보여줍니다.
+        function makeRow(bikeCnt, rackName, rackCnt) {
+            let tempHtml = '';
+            // 만약 남아있는 자전거가 5대 이하면 빨갛게(urgent 디자인 적용) 보여주는 코드
+            if (bikeCnt < 5) {
+                tempHtml = `<tr class="urgent">
+                                <td>${rackName}</td>
+                                <td>${rackCnt}</td>
+                                <td>${bikeCnt}</td>
+                              </tr>`;
+            } else {
+                // 5대 이하가 아니면
+                tempHtml = `<tr>\
+                                <td>${rackName}</td>
+                                <td>${rackCnt}</td>
+                                <td>${bikeCnt}</td>
+                              </tr>`;
+            }
+
+            // 화면 코드를 id=bike-info 에 추가하기
+            $('#bike-info').append(tempHtml);
+        }
+
+        // 따릉이 API를 사용해 정보를 화면에 보여줍니다(makeRow 함수).
+        function showMedicineInfo() {
+            var medName = document.getElementById('item_name').value;
+            $('#bike-info').empty();
+            $.ajax({
+                type: "GET",
+                url: `http://apis.data.go.kr/1470000/MdcinGrnIdntfcInfoService/getMdcinGrnIdntfcInfoList?ServiceKey=3ZPAM2feMz32pRzpOJK5r24532tEUzWc2dOk2iU6Xb9Vdf03hLpU1Q07TvHodKfMw9aulvcNQHLrZR6JylDzfg%3D%3D&numOfRows=100&item_name=${medName}`,
+                data: {},
+                crossDomain: true,
+                dataType: "xml",
+
+                success: function (response) {
+                    console.log(response);
+
+                    $(response).find('item').each(function () {  // xml 문서 item 기준으로 분리후 반복
+                        var name = $(this).find("ITEM_NAME").text();
+                        console.log(name);
+
+                        //var link = $(this).find("link").text();
+                        //var title = $(this).find("title").text();
+                        //var description = $(this).find("description").text();
+                        //var tag = $(this).find("tag").text();
+
+                        //var view_text = link + title + description + tag ;
+                        //$("#id").append(view_text);  // #id 에 view_text 삽입
+                    });
+                    //var txt =
+                    //    '<rss>'
+                    //    +'<item>'
+                    //    +'<name>이름아무거나</name>'
+                    //    +'<age>26</age>'
+                    //    +'</item>'
+                    //    +'</rss>';
+
+
+                    // parser=new DOMParser();
+
+                    // xmlDoc=parser.parseFromString(response,"text/xml");
+
+                    // 특정 테그를 기준으로 변수에 담는다
+                    // var xml = xmlDoc.getElementsByTagName('items');
+                    // console.log(xml);
+                    // getElementsByTagName : 태그 호출
+                    // childNodes : 자식 노드
+                    // nodeValue : 해당 노드의 값(text)
+                    // var name = xml[0].getElementsByTagName('items')[0].getElementsByTagName('name')[0].childNodes[0].nodeValue;
+                    //var items = xml[0].getElementsByTagName('items');
+                    //console.log(items);
+
+                    //for (let i = 0; i < item.length; i++) {
+                    // 거치대 정류장 이름, 정류장의 거치대 수, 남은 자전거 수
+                    //let rackName = rows[i]['stationName'];
+                    //let rackCnt = rows[i]['rackTotCnt'];
+                    //let bikeCnt = rows[i]['parkingBikeTotCnt'];
+                    // 정보를 화면에 보여주는 함수
+                    //makeRow(bikeCnt, rackName, rackCnt);
+                    //}
+                    //alert(name);
+
+
+                    // 필요한 데이터 가져오기
+                }
+            })
+        }
+    </script>
+
+</head>
+
+<body>
+
+    <div class="question-box">
+        <h2>병원 방문 날짜, 병원명, 처방약 및 메모를 입력하세요.</h2>
+        <div>
+            <p>
+                <label>병원 방문일 :
+                    <input type="date" id="hospVisitDate" name="hospVDate"
+                       value="2020-12-01"/>
+                </label>
+            </p>
+            <p>
+                <label>병원명 :
+                    <input id="hospName"/>
+                </label>
+            </p>
+            <p>
+                <label>처방 약 이름 :
+                    <input id="mcName"/>
+                </label>
+            </p>
+            <p>
+                <label>메모 :
+                    <input id="memo"/>
+                </label>
+            </p>
+            <button type="button" class="btn btn-warning" onClick="showMedicineInfo()">기록 추가하기</button>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <td>병원 방문일</td>
+                <td>방문 병원명</td>
+                <td>처방약 정보</td>
+            </tr>
+            </thead>
+            <tbody id="med-info">
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
