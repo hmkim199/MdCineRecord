@@ -20,8 +20,6 @@
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
     <title>의약품 복용기록 관리</title>
-    <!-- JQuery를 import 합니다 -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <style type="text/css">
         div.question-box {
@@ -43,141 +41,164 @@
             color: red;
             font-weight: bold;
         }
+        img {
+            width: 180px;
+            height: 100px;
+        }
     </style>
 
     <script>
-        // 받아온 정보를 화면(테이블 안 열)에 보여줍니다.
-        function makeRow(bikeCnt, rackName, rackCnt) {
-            let tempHtml = '';
-            // 만약 남아있는 자전거가 5대 이하면 빨갛게(urgent 디자인 적용) 보여주는 코드
-            if (bikeCnt < 5) {
-                tempHtml = `<tr class="urgent">
-                                <td>${rackName}</td>
-                                <td>${rackCnt}</td>
-                                <td>${bikeCnt}</td>
-                              </tr>`;
-            } else {
-                // 5대 이하가 아니면
-                tempHtml = `<tr>\
-                                <td>${rackName}</td>
-                                <td>${rackCnt}</td>
-                                <td>${bikeCnt}</td>
-                              </tr>`;
-            }
 
-            // 화면 코드를 id=bike-info 에 추가하기
-            $('#bike-info').append(tempHtml);
-        }
+        function findImg() {
+            let mdCineName = $("#inputMDCineName").val();
+            let mdCineImg = "https://nedrug.mfds.go.kr/pbp/cmn/itemImageDownload/147428065594600146";
 
-        // 따릉이 API를 사용해 정보를 화면에 보여줍니다(makeRow 함수).
-        function showMedicineInfo() {
-            var medName = document.getElementById('item_name').value;
-            $('#bike-info').empty();
             $.ajax({
                 type: "GET",
-                url: `http://apis.data.go.kr/1470000/MdcinGrnIdntfcInfoService/getMdcinGrnIdntfcInfoList?ServiceKey=3ZPAM2feMz32pRzpOJK5r24532tEUzWc2dOk2iU6Xb9Vdf03hLpU1Q07TvHodKfMw9aulvcNQHLrZR6JylDzfg%3D%3D&numOfRows=100&item_name=${medName}`,
+                url: "/medicine/infos",
                 data: {},
-                crossDomain: true,
-                dataType: "xml",
-
                 success: function (response) {
-                    console.log(response);
+                    let mediInfos = response["mediInfos"];
+                    for (let i = 0; i < mediInfos.length; i++) {
+                        if(mediInfos[i]["item_name"]===mdCineName){
+                            mdCineImg = mediInfos[i]["item_image"]
+                            break;
+                        }
+                    }
+                }
+            })
+            return mdCineImg;
+        }
 
-                    $(response).find('item').each(function () {  // xml 문서 item 기준으로 분리후 반복
-                        var name = $(this).find("ITEM_NAME").text();
-                        console.log(name);
+        function postMediInfos() {
+            let date = $("#hospVisitDate").val();
+            let hospName = $("#inputHospName").val();
+            let mdCineName = $("#inputMDCineName").val();
+            let mdCineImg;
+            let memo = $("#inputMemo").val();
 
-                        //var link = $(this).find("link").text();
-                        //var title = $(this).find("title").text();
-                        //var description = $(this).find("description").text();
-                        //var tag = $(this).find("tag").text();
+            mdCineImg = findImg();
 
-                        //var view_text = link + title + description + tag ;
-                        //$("#id").append(view_text);  // #id 에 view_text 삽입
-                    });
-                    //var txt =
-                    //    '<rss>'
-                    //    +'<item>'
-                    //    +'<name>이름아무거나</name>'
-                    //    +'<age>26</age>'
-                    //    +'</item>'
-                    //    +'</rss>';
-
-
-                    // parser=new DOMParser();
-
-                    // xmlDoc=parser.parseFromString(response,"text/xml");
-
-                    // 특정 테그를 기준으로 변수에 담는다
-                    // var xml = xmlDoc.getElementsByTagName('items');
-                    // console.log(xml);
-                    // getElementsByTagName : 태그 호출
-                    // childNodes : 자식 노드
-                    // nodeValue : 해당 노드의 값(text)
-                    // var name = xml[0].getElementsByTagName('items')[0].getElementsByTagName('name')[0].childNodes[0].nodeValue;
-                    //var items = xml[0].getElementsByTagName('items');
-                    //console.log(items);
-
-                    //for (let i = 0; i < item.length; i++) {
-                    // 거치대 정류장 이름, 정류장의 거치대 수, 남은 자전거 수
-                    //let rackName = rows[i]['stationName'];
-                    //let rackCnt = rows[i]['rackTotCnt'];
-                    //let bikeCnt = rows[i]['parkingBikeTotCnt'];
-                    // 정보를 화면에 보여주는 함수
-                    //makeRow(bikeCnt, rackName, rackCnt);
-                    //}
-                    //alert(name);
-
-
-                    // 필요한 데이터 가져오기
+            // 2. POST 방식으로 메모 생성 요청하기
+            $.ajax({
+                type: "POST", // POST 방식으로 요청하겠다.
+                url: "/medicine/record", // /memo라는 url에 요청하겠다.
+                data: {date_give: date, hospN_give: hospName, mdCineN_give: mdCineName, mdCineImg_give: mdCineImg, memo_give: memo}, // 데이터를 주는 방법
+                success: function (response) { // 성공하면
+                    if (response["result"] === "success") {
+                        alert("기록 완료!");
+                        // 3. 성공 시 페이지 새로고침하기
+                        window.location.reload();
+                    } else {
+                        alert("서버 오류!");
+                    }
                 }
             })
         }
+
+        function showMediInfos() {
+            $.ajax({
+                type: "GET",
+                url: "/medicine/record",
+                data: {},
+                success: function (response) {
+                    let mediInfos = response["mediInfos"];
+                    let records = response["records"];
+                    console.log(mediInfos);
+                    for (let i = 0; i < mediInfos.length; i++) {
+                        makeTuple(records[i]["date"], records[i]["hospName"], records[i]["mdCineName"], records[i]["image"], records[i]["memo"]);
+                    }
+                }
+            })
+        }
+
+        function makeTuple(hospDate, hospName, image, mdCineName, memo) {
+            let tempHtml = `<tr>
+                            <th scope="row">${hospDate}</th>
+                            <td>${hospName}</td>
+                            <td><img
+                                    src="${image}"
+                                    alt="약 이미지"
+                            />
+                            </td>
+                            <td>${mdCineName}</td>
+                            <td>${memo}</td>
+                            </tr>`;
+            $("#tuple-add").append(tempHtml);
+
+        }
+
+        $(document).ready(function () {
+            $("#tuple-add").html("");
+            showMediInfos();
+        });
+
+
+
     </script>
 
 </head>
 
 <body>
 
+<form>
     <div class="question-box">
-        <h2>병원 방문 날짜, 병원명, 처방약 및 메모를 입력하세요.</h2>
-        <div>
-            <p>
-                <label>병원 방문일 :
-                    <input type="date" id="hospVisitDate" name="hospVDate"
-                       value="2020-12-01"/>
-                </label>
-            </p>
-            <p>
-                <label>병원명 :
-                    <input id="hospName"/>
-                </label>
-            </p>
-            <p>
-                <label>처방 약 이름 :
-                    <input id="mcName"/>
-                </label>
-            </p>
-            <p>
-                <label>메모 :
-                    <input id="memo"/>
-                </label>
-            </p>
-            <button type="button" class="btn btn-warning" onClick="showMedicineInfo()">기록 추가하기</button>
-        </div>
-
-        <table>
-            <thead>
-            <tr>
-                <td>병원 방문일</td>
-                <td>방문 병원명</td>
-                <td>처방약 정보</td>
-            </tr>
-            </thead>
-            <tbody id="med-info">
-            </tbody>
-        </table>
+        <label for="hospName">병원 방문일 :</label>
+        <input type="date" class="form-control" id="hospVisitDate" name="hospVDate" aria-describedby="VDHelp"
+               placeholder="Enter email">
+        <small id="VDHelp" class="form-text text-muted">병원 방문일을 입력하세요.</small>
     </div>
+    <div class="form-group1">
+        <label for="hospName">병원명 :</label>
+        <input type="text" class="form-control1" id="inputHospName" placeholder="병원명">
+    </div>
+    <div class="form-group2">
+        <label for="mdCineName">처방 약 이름 :</label>
+        <input type="text" class="form-control2" id="inputMDCineName" placeholder="처방 약 이름">
+    </div>
+    <div class="form-group3">
+        <label for="memo">기타 메모 :</label>
+        <input type="text" class="form-control3" id="inputMemo" placeholder="메모 입력">
+    </div>
+
+    <button type="button" class="btn btn-warning" onClick="postMediInfos()">기록 추가하기</button>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+    <tr>
+        <th scope="col">병원 방문일</th>
+        <th scope="col">병원명</th>
+        <th scope="col">처방약 이미지</th>
+        <th scope="col">처방의약품명</th>
+        <th scope="col">메모</th>
+    </tr>
+    </thead>
+    <tbody id="tuple-add">
+    <tr>
+        <th scope="row">2020.01.01</th>
+        <td>가나다병원</td>
+        <td><img
+                src="https://nedrug.mfds.go.kr/pbp/cmn/itemImageDownload/147428065594600146"
+                alt="약 이미지"
+        />
+        </td>
+        <td>타이레놀</td>
+        <td>3일복용 후 약간의 복통</td>
+    </tr>
+    <tr>
+        <th scope="row">2020.01.01</th>
+        <td>가나다병원</td>
+        <td><img
+                src="https://nedrug.mfds.go.kr/pbp/cmn/itemImageDownload/147428065594600146"
+                alt="약 이미지"
+        />
+        </td>
+        <td>타이레놀</td>
+        <td>3일복용 후 약간의 복통</td>
+    </tr>
+    </tbody>
+</table>
 </body>
 
 </html>
