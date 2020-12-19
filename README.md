@@ -1,46 +1,22 @@
-<img src="https://user-images.githubusercontent.com/17819874/79853717-5db2f900-8403-11ea-99ba-ed0bb3cdb9ef.png" height="100"/>
 
-# 프로젝트 이름  
-[![made-with-Markdown](https://img.shields.io/badge/Made%20with-Markdown-1f425f.svg)](http://commonmark.org)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/ohahohah/readme-template/graphs/commit-activity) 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+# 의약품 복용 기록 관리 : Medicine Record
 
 
-
-> 프로젝트 간략 소개 한 문장 
-- 웹사이트 url / (챗봇일 경우)텔레그램 등 메신저 주소
-- 사이트에 대한 1-2단락 설명
+> 내가 언제 무슨 약을 먹었지? => 기록, 관리하자
+- 의약품 복용 기록 관리 : Medicine Record는 내가 복용한 약 정보를 기록하고 관리하는 웹 서비스입니다. 언제 어느 병원에서 어떤 약을 처방 받았는지 개인적인 메모와 함께 입력하면 이를 mongoDB에 저장, 날짜 순으로 보여주고 기록 수정을 눌러 특정 부분을 수정하거나 메모를 추가할 수도 있습니다. 
 
 ## 핵심 기능  Key Feature
-- (예시) 실시간 지역별 날씨에 맞는 옷차림 정보를 알려줍니다.
-- (예시) 미세먼지 정보를 파악할 수 있습니다.
+- 사용자는 의약품의 정식 명칭을 모르는 경우가 많고, 이미지와 함께 보여주기 위해서 의약품 정보에 관한 오픈 API를 사용해서 의약품 정보 데이터를 내 mongoDB에 미리 저장해두었습니다. 
+- 사용자가 입력한 약 이름의 문자열을 포함하는 모든 의약품 명칭을 mongoDB에서 검색하여 보여줍니다.
+- 사용자가 하나를 선택하면 이 이름으로 데이터베이스에서 이미지 정보를 가져와 보여주고 사용자가 입력한 내용을 mongoDB에 저장합니다.
 
 ## 사용 How To Use
-- 사용하고 싶도록 유용한 몇 가지 예를 적습니다. 코드 블록과 스크린샷 포함.
-- (wiki가 있을 경우) _더 많은 예시와 사용 예제는 [Wiki](wiki)를 참고하세요._
-![](header.png)
-
-## Contributing
-*(프로젝트 기여자가 있을 경우 적습니다)*
-- Thanks to @기여자이름
+- 내가 언제 무슨 약을 먹었는지 기억나지 않는다면? 과거에 복용한 약과 현재 복용중인 약 사이에 부작용은 없을지 검색해보고 싶은데, 약 봉투를 이미 버렸다면? 이를 기록해주는 웹 서비스가 필요하다!
+- Medicine Record를 사용하자!
 
 ## Reference
-*(참고 리소스,  code snippet, 라이센스 정보를 표기합니다)*
-- (예시) [네이버 지도 API](링크url) : 장소카드 지도화면에 사용
-- (예시) [Teachable Machine](https://teachablemachine.withgoogle.com/) : 절하는 pose MachineLearning Model 
+- [의약품 낱알식별정보 오픈 API](https://www.data.go.kr/data/15057639/openapi.do) : 정식 의약품명, 이미지 정보를 가져오기 위해 사용
 
 ## Links
-*(사람이 읽기 쉽게 요약된 링크 정보를 추가합니다. 현재 리포지토리의 정보를 적습니다)*
-- Project homepage: (예시) https://yourname.github.io/github-tutorial/
-- Repository: (예시) https://github.com/ohahohah/github-tutorial
-- 관련 프로젝트
-  - 프로젝트 이름 : (예시) https://github.com/ohahohah/readme-template
-  - 프로젝트 이름: (예시) https://github.com/someones/awesome-project/
-
-## License
-*(공동작업자가 있을 경우 모두 적어줍니다)*  
-이름1 – [이메일 주소1](mailto:이메일주소@example.com)  
-이름2 - [이메일 주소2](mailto:이메일주소@example.com)  
-
-XYZ license를 준수합니다. ``LICENSE``에서 자세한 정보를 확인할 수 있습니다.  
-(예시) [https://github.com/yourname/github-link/LICENSE.md](https://github.com/ohahohah/)
+- https://hmkim199.blog.me/222142223734
+- https://hmkim199.blog.me/222178684630
