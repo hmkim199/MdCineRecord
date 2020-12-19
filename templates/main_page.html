@@ -9,6 +9,8 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -22,6 +24,23 @@
     <title>의약품 복용기록 관리</title>
 
     <style type="text/css">
+        * {
+            font-family: 'Nanum Gothic', sans-serif;
+        }
+
+        #enterForm {
+            padding: 10px;
+            margin: auto;
+            width: 500px;
+            border: 2px solid lightgrey;
+            border-radius: 8px;
+        }
+
+        #add-Btn{
+            margin-top: 20px;
+            margin-left: 340px;
+        }
+
         div.question-box {
             margin: 10px 0 20px 0;
         }
@@ -31,59 +50,94 @@
             border-collapse: collapse;
         }
 
-        td,
-        th {
+        td, th {
             padding: 10px;
             border: 1px solid;
+            width: auto;
         }
 
-        .urgent {
-            color: red;
-            font-weight: bold;
-        }
         img {
             width: 180px;
             height: 100px;
         }
+
+        input{
+            outline: none !important;
+            border:1px solid lightgrey;
+            border-radius: 3px;
+        }
+
     </style>
 
     <script>
 
-        function findImg() {
-            let mdCineName = $("#inputMDCineName").val();
-            let mdCineImg = "https://nedrug.mfds.go.kr/pbp/cmn/itemImageDownload/147428065594600146";
+        function modifyMediInfos() {
+            $('#enterForm').empty();
 
-            $.ajax({
-                type: "GET",
-                url: "/medicine/infos",
-                data: {},
-                success: function (response) {
-                    let mediInfos = response["mediInfos"];
-                    for (let i = 0; i < mediInfos.length; i++) {
-                        if(mediInfos[i]["item_name"]===mdCineName){
-                            mdCineImg = mediInfos[i]["item_image"]
-                            break;
-                        }
-                    }
-                }
-            })
-            return mdCineImg;
+            $("#mediTable tr").click(function(){
+                let str = "";
+                const tdArr = new Array();    // 배열 선언
+                let tr = $(this);
+                let td = tr.children();
+                td.each(function(i){
+                    tdArr.push(td.eq(i).text());
+                });
+                let date = tdArr[0];
+                let hospName = tdArr[1];
+                let mdCineName = tdArr[3];
+                let memo = tdArr[4];
+                let tempHtml = `<div class="question-box">
+                                    <label for="hospName"><b>병원 방문일 :</b></label>
+                                    <input type="date" class="form-control" id="hospVisitDate" name="hospVDate" aria-describedby="VDHelp"
+                                           placeholder="Enter email" value=${tdArr[0]}>
+                                    <small id="VDHelp" class="form-text text-muted">병원 방문일을 입력하세요.</small>
+                                </div>
+                                <div class="form-group1">
+                                    <label for="hospName"><b>병원명 :</b></label>
+                                    <input type="text" class="form-control1" id="inputHospName" placeholder="병원명" value=${tdArr[1]}>
+                                </div>
+                                <div class="form-group2" id="mdCineNames">
+                                    <label for="mdCineName"><b>처방 약 이름 :</b></label>
+                                    <input type="text" class="form-control2" id="inputMDCineName" placeholder="처방 약 이름" value=${tdArr[3]}> <button type="button" style="background-color: grey;" class="btn btn-secondary" onClick="findMedi()">검색</button>
+                                </div>
+                                <div class="form-group3">
+                                    <label for="memo"><b>기타 메모 :</b></label>
+                                    <input type="text" class="form-control3" id="inputMemo" placeholder="메모 입력" value=${tdArr[4]}>
+                                </div>
+                                <button type="button" style="background-color: grey;" class="btn btn-secondary" onClick="postModifyMediInfos('${date}', '${hospName}', '${mdCineName}', '${memo}')">수정 완료</button>`;
+                $("#enterForm").append(tempHtml);
+            });
         }
 
+        function postModifyMediInfos(date, hospName, mdCineName, memo){
+            $.ajax({
+                type: "POST",
+                url: "/medicine/modify",
+                data: {date_give: date, hospN_give: hospName, mdCineN_give: mdCineName, memo_give: memo},
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        console.log("success remove");
+                        window.location.reload();
+                    }
+                }
+            });
+            postMediInfos();
+        }
+
+
         function postMediInfos() {
+
             let date = $("#hospVisitDate").val();
             let hospName = $("#inputHospName").val();
-            let mdCineName = $("#inputMDCineName").val();
-            let mdCineImg;
+            let mdCineName = $("#realMediName").text();
             let memo = $("#inputMemo").val();
 
-            mdCineImg = findImg();
-
-            // 2. POST 방식으로 메모 생성 요청하기
             $.ajax({
                 type: "POST", // POST 방식으로 요청하겠다.
-                url: "/medicine/record", // /memo라는 url에 요청하겠다.
-                data: {date_give: date, hospN_give: hospName, mdCineN_give: mdCineName, mdCineImg_give: mdCineImg, memo_give: memo}, // 데이터를 주는 방법
+                url: "/medicine/record",
+                // data: {date_give: date, hospN_give: hospName, mdCineN_give: mdCineName, mdCineImg_give: mdCineImg, memo_give: memo}, // 데이터를 주는 방법
+                data: {date_give: date, hospN_give: hospName, mdCineN_give: mdCineName, memo_give: memo}, // 데이터를 주는 방법
+
                 success: function (response) { // 성공하면
                     if (response["result"] === "success") {
                         alert("기록 완료!");
@@ -97,39 +151,92 @@
         }
 
         function showMediInfos() {
+            $('#tuple-add').empty();
             $.ajax({
                 type: "GET",
                 url: "/medicine/record",
                 data: {},
                 success: function (response) {
-                    let mediInfos = response["mediInfos"];
                     let records = response["records"];
-                    console.log(mediInfos);
-                    for (let i = 0; i < mediInfos.length; i++) {
-                        makeTuple(records[i]["date"], records[i]["hospName"], records[i]["mdCineName"], records[i]["image"], records[i]["memo"]);
+                    // console.log(mediInfos);
+                    for (let i = 0; i < records.length; i++) {
+                        // makeTuple(records[i]["date"], records[i]["hospName"], records[i]["mdCineName"], records[i]["image"], records[i]["memo"]);
+                        makeTuple(records[i]["date"], records[i]["hospName"], records[i]["mdCineName"], records[i]["memo"]);
+
                     }
                 }
             })
         }
 
-        function makeTuple(hospDate, hospName, image, mdCineName, memo) {
-            let tempHtml = `<tr>
+        function makeTuple(hospDate, hospName, mdCineName, memo) {
+            let mdCineImg;
+
+            $.ajax({
+                type: "GET",
+                url: "/medicine/infos",
+                data: {},
+                success: function (response) {
+                    let mediInfos = response["mediInfos"];
+
+                    for (let i = 0; i < mediInfos.length; i++) {
+                        if(mediInfos[i]["item_name"]==mdCineName){
+                            mdCineImg = mediInfos[i]["item_image"]
+                            //console.log(mdCineImg);
+                            break;
+                        }
+                    }
+                    let tempHtml = `<tr>
                             <th scope="row">${hospDate}</th>
                             <td>${hospName}</td>
                             <td><img
-                                    src="${image}"
+                                    src="${mdCineImg}"
                                     alt="약 이미지"
                             />
                             </td>
                             <td>${mdCineName}</td>
                             <td>${memo}</td>
+                            <td><button type="button" class="btn btn-warning" onClick="modifyMediInfos()">수정</button></td>
                             </tr>`;
-            $("#tuple-add").append(tempHtml);
+                    $("#tuple-add").append(tempHtml);
+                }
+            })
+        }
 
+        function myChange(obj){
+            let realMDCineName = $(obj).val();
+            //console.log(realMDCineName);
+            let tempHtml = `<p id = "realMediName">${realMDCineName}</p>`
+            $("#mdCineNames").append(tempHtml);
+        }
+
+        function findMedi() {
+            let mdCineName = $("#inputMDCineName").val();
+            let names = [];
+            let mdCineImg;
+            $.ajax({
+                type: "GET",
+                url: "/medicine/infos",
+                data: {},
+                success: function (response) {
+                    let mediInfos = response["mediInfos"];
+                    for (let i = 0; i < mediInfos.length; i++) {
+                        if(mediInfos[i]["item_name"].includes(mdCineName)){
+                            names.push(mediInfos[i]["item_name"])
+                        }
+                    }
+                    let tempHtml = `<div id="my-select" style="width: 400px;"><select style="width: 460px;" onchange="myChange(this)">
+                                        <option style="width: 460px;">정확한 의약품명을 선택해주세요.</option>`;
+                    for (let i = 0; i < names.length; i++){
+                        let myname = names[i]
+                        tempHtml += `<option style="width: 460px;">${myname}</option>`
+                    }
+                    tempHtml += `</select></div>`;
+                    $("#mdCineNames").append(tempHtml);
+                }
+            })
         }
 
         $(document).ready(function () {
-            $("#tuple-add").html("");
             showMediInfos();
         });
 
@@ -141,30 +248,33 @@
 
 <body>
 
-<form>
-    <div class="question-box">
-        <label for="hospName">병원 방문일 :</label>
-        <input type="date" class="form-control" id="hospVisitDate" name="hospVDate" aria-describedby="VDHelp"
-               placeholder="Enter email">
-        <small id="VDHelp" class="form-text text-muted">병원 방문일을 입력하세요.</small>
-    </div>
-    <div class="form-group1">
-        <label for="hospName">병원명 :</label>
-        <input type="text" class="form-control1" id="inputHospName" placeholder="병원명">
-    </div>
-    <div class="form-group2">
-        <label for="mdCineName">처방 약 이름 :</label>
-        <input type="text" class="form-control2" id="inputMDCineName" placeholder="처방 약 이름">
-    </div>
-    <div class="form-group3">
-        <label for="memo">기타 메모 :</label>
-        <input type="text" class="form-control3" id="inputMemo" placeholder="메모 입력">
-    </div>
+<p id="record-box">
+    <form id="enterForm" class="p-3 mb-2 bg-warning text-dark">
+        <div class="question-box">
+            <label for="hospName"><b>병원 방문일 :</b></label>
+            <input type="date" class="form-control" id="hospVisitDate" name="hospVDate" aria-describedby="VDHelp"
+                   placeholder="Enter email">
+            <small id="VDHelp" class="form-text text-muted">병원 방문일을 입력하세요.</small>
+        </div>
+        <div class="form-group1">
+            <label for="hospName"><b>병원명 :</b></label>
+            <input type="text" class="form-control1" id="inputHospName" placeholder="병원명">
+        </div>
+        <div class="form-group2" id="mdCineNames">
+            <label for="mdCineName"><b>처방 약 이름 :</b></label>
+            <input type="text" class="form-control2" id="inputMDCineName" placeholder="처방 약 이름"> <button type="button" style="background-color: grey;" class="btn btn-secondary" onClick="findMedi()">검색</button>
+        </div>
+        <div class="form-group3">
+            <label for="memo"><b>기타 메모 :</b></label>
+            <input type="text" class="form-control3" id="inputMemo" placeholder="메모 입력">
+        </div>
 
-    <button type="button" class="btn btn-warning" onClick="postMediInfos()">기록 추가하기</button>
-</form>
+        <button type="button" style="background-color: grey;" id="add-Btn" class="btn btn-secondary" onClick="postMediInfos()">기록 추가하기</button>
+    </form>
+</p>
 
-<table class="table table-bordered">
+<p>
+<table class="table table-bordered table-hover" id="mediTable">
     <thead>
     <tr>
         <th scope="col">병원 방문일</th>
@@ -172,6 +282,7 @@
         <th scope="col">처방약 이미지</th>
         <th scope="col">처방의약품명</th>
         <th scope="col">메모</th>
+        <th scope="col">수정선택</th>
     </tr>
     </thead>
     <tbody id="tuple-add">
@@ -199,6 +310,7 @@
     </tr>
     </tbody>
 </table>
+</p>
 </body>
 
 </html>

@@ -17,21 +17,6 @@ def get_main_page():
     return render_template('main_page.html')
 
 
-# @app.route('/info', methods=['POST'])
-# def post_article():
-#
-#     item_name = "타이레놀"
-#     item_image = "https://nedrug.mfds.go.kr/pbp/cmn/itemImageDownload/147428065594600146"
-#     side_effect = "가려움증"
-#
-#     info = {'item_name': item_name, 'item_image': item_image, 'side_effect': side_effect}
-#
-#     # 3. mongoDB에 데이터를 넣기
-#     db.infos.insert_one(info)
-#
-#     return jsonify({'result': 'success'})
-
-
 @app.route('/medicine/infos', methods=['GET'])
 def read_infos():
     # 1. mongoDB에서 _id 값을 제외한 모든 데이터 조회해오기(Read)
@@ -43,30 +28,44 @@ def read_infos():
 @app.route('/medicine/record', methods=['GET'])
 def read_records():
     # 1. mongoDB에서 _id 값을 제외한 모든 데이터 조회해오기(Read)
-    records = list(db.records.find({}, {'_id': False}))
+    records = list(db.records.find({}, {'_id': False}).sort('date'))
 
+    print(records)
 
-    #print(mediInfos)
-
-    # 2. articles라는 키 값으로 articles 정보 보내주기
     return jsonify({'result': 'success', 'msg': 'GET 연결되었습니다!', 'records': records})
 
 
-@app.route('/medicine/record', methods=['POST'])
-def post_record():
-    # {date_give: date, hospN_give: hospName, mdCineN_give: mdCineName, memo_give: memo}
+@app.route('/medicine/modify', methods=['POST'])
+def post_record_modify():
     date_receive = request.form['date_give']
     hospN_receive = request.form['hospN_give']
     mdCineN_receive = request.form['mdCineN_give']
-    mdCineImg_receive: request.form['mdCineImg_give']
     memo_receive = request.form['memo_give']
 
-    # DB에 삽입할 review 만들기
+    # DB에 삽입할 record 만들기
     record = {
         'date': date_receive,
         'hospName': hospN_receive,
         'mdCineName': mdCineN_receive,
-        'mdCineImg': mdCineImg_receive,
+        'memo': memo_receive
+    }
+    db.records.delete_one(record)
+    # 성공 여부 & 성공 메시지 반환
+    return jsonify({'result': 'success'})
+
+
+@app.route('/medicine/record', methods=['POST'])
+def post_record():
+    date_receive = request.form['date_give']
+    hospN_receive = request.form['hospN_give']
+    mdCineN_receive = request.form['mdCineN_give']
+    memo_receive = request.form['memo_give']
+
+    # DB에 삽입할 record 만들기
+    record = {
+        'date': date_receive,
+        'hospName': hospN_receive,
+        'mdCineName': mdCineN_receive,
         'memo': memo_receive
     }
     # reviews에 review 저장하기

@@ -9,6 +9,8 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap" rel="stylesheet">
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -24,33 +26,28 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <style type="text/css">
-        div.question-box {
-            margin: 10px 0 20px 0;
+        * {
+            font-family: 'Nanum Gothic', sans-serif;
+        }
+        #main-text{
+            margin-top: 200px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 0px solid lightgrey;
+            width: 400px;
+
         }
 
-        table {
-            border: 1px solid;
-            border-collapse: collapse;
-        }
-
-        td,
-        th {
-            padding: 10px;
-            border: 1px solid;
-        }
-
-        .urgent {
-            color: red;
-            font-weight: bold;
-        }
     </style>
 
 </head>
 
 <body>
-    <h2>의약품 복용 기록 관리</h2>
-    <h1>Medicine Record</h1>
-    <button type="button" class="btn btn-warning" onClick="location.href='/main'">시작하기</button>
+    <div id="main-text" style="text-align: center;">
+        <h3>의약품 복용 기록 관리</h3>
+        <h1><b>Medicine Record</b></h1>
+        <button type="button" class="btn btn-warning" onClick="location.href='/main'">시작하기</button>
+    </div>
 </body>
 
 </html>
